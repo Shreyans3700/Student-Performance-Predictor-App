@@ -5,6 +5,7 @@ import sys
 import dill
 import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.model_selection import RandomizedSearchCV
 
 
 def save_object(object, file_path: str) -> bool:
@@ -36,19 +37,24 @@ def calculate_model_score(y, y_pred, prefix):
     }
 
 
-def evaluate_models(X_train, y_train, X_test, y_test, models):
+def evaluate_models(X_train, y_train, X_test, y_test, models, params):
     try:
         report = {}
 
         for i in range(len(list(models.values()))):
             model = list(models.values())[i]
+            param = list(params.values())[i]
             model_name = list(models.keys())[i]
             logging.info("Starting Model Training of %s", model_name)
 
-            model.fit(X_train, y_train)
+            random_cv = RandomizedSearchCV(
+                estimator=model, cv=3, param_distributions=param, n_jobs=-1, n_iter=50
+            )
 
-            y_train_pred = model.predict(X_train)
-            y_test_pred = model.predict(X_test)
+            random_cv.fit(X_train, y_train)
+
+            y_train_pred = random_cv.predict(X_train)
+            y_test_pred = random_cv.predict(X_test)
 
             training_data_model_report = calculate_model_score(
                 y_train, y_train_pred, "Training"
@@ -60,6 +66,7 @@ def evaluate_models(X_train, y_train, X_test, y_test, models):
             model_report = {
                 "Training Data Report": training_data_model_report,
                 "Test Data Report": testing_data_model_report,
+                "Best Params": random_cv.best_params_,
             }
 
             report[list(models.keys())[i]] = model_report

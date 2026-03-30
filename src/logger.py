@@ -1,15 +1,40 @@
 import logging
 import os
 from datetime import datetime
+from logging.handlers import RotatingFileHandler
 
-LOG_FILE = f"{datetime.now().strftime('%m_%d_%Y_%H_%M_%S')}.log"
-logs_path = os.path.join(os.getcwd(), "logs", LOG_FILE)
-os.makedirs(logs_path, exist_ok=True)
+# Create logs directory
+LOG_DIR = os.path.join(os.getcwd(), "logs")
+os.makedirs(LOG_DIR, exist_ok=True)
 
-LOG_FILE_PATH = os.path.join(logs_path, LOG_FILE)
+# Log file name
+LOG_FILE = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log"
+LOG_FILE_PATH = os.path.join(LOG_DIR, LOG_FILE)
 
-logging.basicConfig(
-    filename=LOG_FILE_PATH,
-    format="[ %(asctime)s ] %(lineno)d %(name)s - %(levelname)s = %(message)s",
-    level=logging.INFO,
+# Create logger
+logger = logging.getLogger("MLProjectLogger")
+logger.setLevel(logging.INFO)
+logger.propagate = False  # Prevent duplicate logs
+
+# Formatter
+formatter = logging.Formatter(
+    "[ %(asctime)s ] %(levelname)s %(name)s:%(lineno)d - %(message)s"
 )
+
+# File Handler (with rotation)
+file_handler = RotatingFileHandler(
+    LOG_FILE_PATH, maxBytes=5 * 1024 * 1024, backupCount=3
+)
+file_handler.setFormatter(formatter)
+
+# Console Handler (for terminal output)
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(formatter)
+
+# Add handlers only once (avoid duplicate logs)
+if not logger.handlers:
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
+
+# Export logger
+logging = logger

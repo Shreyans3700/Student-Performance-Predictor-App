@@ -11,6 +11,7 @@ from src.exception import CustomException
 from dataclasses import dataclass
 from src.utils import evaluate_models
 from src.utils import save_object
+from src.configs.models_hyperparameter_configs import ModelsHyperParameterConfigs
 
 
 @dataclass
@@ -41,8 +42,10 @@ class ModelTrainer:
                 "XG Boost": XGBRegressor(),
             }
 
+            model_params = ModelsHyperParameterConfigs()
+
             model_report: dict = evaluate_models(
-                X_train, y_train, X_test, y_test, models
+                X_train, y_train, X_test, y_test, models, model_params.params
             )
 
             logging.info("Model Reports are %s", model_report)
