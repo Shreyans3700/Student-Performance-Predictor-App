@@ -101,6 +101,29 @@ Key libraries used:
 - The prediction target is `math_score`.
 - The app expects categorical values under keys like `gender`, `race_ethnicity`, `parental_level_of_education`, `lunch`, and `test_preparation_course`.
 
+
+## Docker Setup In EC2 commands to be Executed
+
+#optinal
+
+sudo apt-get update -y
+
+sudo apt-get upgrade
+
+#required
+
+curl -fsSL https://get.docker.com -o get-docker.sh
+
+sudo sh get-docker.sh
+
+sudo usermod -aG docker ubuntu
+
+newgrp docker
+
+## after setting up runner in ec2 instance
+
+nohup ./run.sh &
+
 ## Contact
 
 Author: Shreyansh
